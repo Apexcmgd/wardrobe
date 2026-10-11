@@ -256,7 +256,7 @@ export const AddClothingModal: React.FC<AddClothingModalProps> = ({
                 <img
                   src={savedSuccessItem.imageData}
                   alt={savedSuccessItem.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#f8fafc' }}
                 />
               </div>
 

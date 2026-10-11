@@ -17,14 +17,11 @@ export async function compressImage(
         let width = img.width;
         let height = img.height;
 
+        // Calculate scaling factor while strictly preserving aspect ratio
         if (width > maxWidth || height > maxHeight) {
-          if (width / height > maxWidth / maxHeight) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          } else {
-            width = Math.round((width * maxHeight) / height);
-            maxHeight = height;
-          }
+          const scale = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
         }
 
         const canvas = document.createElement('canvas');

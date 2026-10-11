@@ -202,7 +202,7 @@ export const ClothingDetailModal: React.FC<ClothingDetailModalProps> = ({
               <>
                 <div className="form-field">
                   <label className="field-label">衣物照片</label>
-                  <div className="preview-photo-wrap" style={{ maxHeight: 220 }}>
+                  <div className="preview-photo-wrap preview-photo-wrap--edit">
                     <img src={editImageData} alt="预览" className="preview-photo-img" />
                     <div className="preview-overlay-actions">
                       <button
@@ -281,8 +281,8 @@ export const ClothingDetailModal: React.FC<ClothingDetailModalProps> = ({
               <>
                 {/* Photo Viewer */}
                 <div
-                  className="preview-photo-wrap"
-                  style={{ cursor: 'zoom-in', maxHeight: 320 }}
+                  className="preview-photo-wrap preview-photo-wrap--detail"
+                  style={{ cursor: 'zoom-in' }}
                   onClick={() => setIsFullScreenPhoto(true)}
                   title="点击查看全屏大图"
                 >
@@ -428,6 +428,9 @@ export const ClothingDetailModal: React.FC<ClothingDetailModalProps> = ({
             style={{
               maxWidth: '92vw',
               maxHeight: '92vh',
+              width: 'auto',
+              height: 'auto',
+              flex: 'none',
               objectFit: 'contain',
               borderRadius: 8,
             }}

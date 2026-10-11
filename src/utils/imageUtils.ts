@@ -4,25 +4,57 @@
 
 export async function compressImage(
   file: File | Blob,
-  maxWidth = 1200,
-  maxHeight = 1200,
-  quality = 0.82
+  maxWidth = 1400,
+  maxHeight = 1400,
+  quality = 0.85
 ): Promise<string> {
+  // 1. Try modern createImageBitmap first (best for mobile devices, automatically handles EXIF orientation)
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const origWidth = bitmap.width;
+      const origHeight = bitmap.height;
+
+      // Scale proportionally, do not upscale if smaller
+      const scale = Math.min(maxWidth / origWidth, maxHeight / origHeight, 1);
+      const width = Math.round(origWidth * scale);
+      const height = Math.round(origHeight * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(bitmap, 0, 0, width, height);
+
+        let dataUrl = canvas.toDataURL('image/webp', quality);
+        if (!dataUrl.startsWith('data:image/webp')) {
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        return dataUrl;
+      }
+    } catch {
+      // Fall through to FileReader fallback
+    }
+  }
+
+  // 2. Reliable FileReader fallback
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        const origWidth = img.naturalWidth || img.width;
+        const origHeight = img.naturalHeight || img.height;
 
         // Calculate scaling factor while strictly preserving aspect ratio
-        if (width > maxWidth || height > maxHeight) {
-          const scale = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
+        const scale = Math.min(maxWidth / origWidth, maxHeight / origHeight, 1);
+        const width = Math.round(origWidth * scale);
+        const height = Math.round(origHeight * scale);
 
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -34,7 +66,7 @@ export async function compressImage(
           return;
         }
 
-        // Fill subtle white background for transparent images
+        // Draw image keeping exact aspect ratio
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
@@ -101,23 +133,18 @@ export function generateClothingArtwork(type: 'tshirt' | 'hoodie' | 'pants' | 's
   let detailsD = '';
   
   if (type === 'tshirt') {
-    // T-shirt silhouette
     pathD = `M 220 150 Q 300 200 380 150 L 460 210 L 410 270 L 370 240 L 370 470 L 230 470 L 230 240 L 190 270 L 140 210 Z`;
     detailsD = `M 260 168 Q 300 195 340 168`;
   } else if (type === 'shorts') {
-    // Shorts
     pathD = `M 210 200 L 390 200 L 405 380 L 330 380 L 305 270 L 280 270 L 255 380 L 195 380 Z`;
     detailsD = `M 210 230 L 390 230 M 295 230 L 295 270`;
   } else if (type === 'pants') {
-    // Long pants
     pathD = `M 220 160 L 380 160 L 395 480 L 325 480 L 305 260 L 285 260 L 265 480 L 205 480 Z`;
     detailsD = `M 220 190 L 380 190`;
   } else if (type === 'downjacket') {
-    // Puffer down jacket
     pathD = `M 230 160 Q 300 190 370 160 L 470 220 L 430 420 L 380 390 L 380 470 L 220 470 L 220 390 L 170 420 L 130 220 Z`;
     detailsD = `M 300 178 L 300 470 M 220 250 L 380 250 M 220 320 L 380 320 M 220 390 L 380 390`;
   } else {
-    // Jacket
     pathD = `M 220 150 Q 300 190 380 150 L 460 210 L 420 430 L 370 410 L 370 470 L 230 470 L 230 410 L 180 430 L 140 210 Z`;
     detailsD = `M 300 170 L 300 470 M 260 160 L 300 240 L 340 160`;
   }

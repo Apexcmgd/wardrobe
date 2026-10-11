@@ -1,0 +1,17 @@
+{
+  "name": "数字衣橱",
+  "short_name": "衣橱",
+  "description": "简洁、美观、易用的个人衣物管理与数字衣橱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
